@@ -150,7 +150,7 @@ netfilter-persistent save
 
 # ---------- RESTART ----------
 echo "[*] Перезапуск сервисов..."
-if systemctl list-unit-files | grep -q '^strongswan-starter\.service'; then
+if systemctl list-unit-files | grep -q strongswan-starter; then
   systemctl restart strongswan-starter
 else
   systemctl restart strongswan
