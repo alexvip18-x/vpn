@@ -11,7 +11,7 @@ VPN_DNS2="1.1.1.1"
 WAN_IF="eth0"   # внешний интерфейс (замени если нужно)
 PSK="js7bFbs8Smu9Ys5z"   # общий ключ IPsec
 
-# --- Получение логина и пароля ---
+# --- Пользователь/пароль ---
 if [ -n "$1" ] && [[ "$1" != -* ]]; then
     VPN_USER="$1"
 else
@@ -96,9 +96,15 @@ iptables -t nat -A POSTROUTING -s ${VPN_POOL%-*}/24 -o $WAN_IF -j MASQUERADE
 netfilter-persistent save
 
 echo "[*] Перезапуск сервисов..."
-systemctl enable strongswan
+if systemctl list-unit-files | grep -q strongswan-starter.service; then
+    STRONGSWAN_SERVICE="strongswan-starter"
+else
+    STRONGSWAN_SERVICE="strongswan"
+fi
+
+systemctl enable $STRONGSWAN_SERVICE
 systemctl enable xl2tpd
-systemctl restart strongswan
+systemctl restart $STRONGSWAN_SERVICE
 systemctl restart xl2tpd
 
 SERVER_IP=$(curl -s ifconfig.me || echo "YOUR_SERVER_IP")
