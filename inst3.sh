@@ -148,7 +148,7 @@ iptables -t nat -C POSTROUTING -s "${VPN_SUBNET}" -o "${WAN_IF}" -j MASQUERADE 2
 iptables -t nat -A POSTROUTING -s "${VPN_SUBNET}" -o "${WAN_IF}" -j MASQUERADE
 netfilter-persistent save
 
-# ---------- RESTART ----------
+# ---------- RESTART 2 ----------
 echo "[*] Перезапуск сервисов..."
 if systemctl list-unit-files | grep -q strongswan-starter; then
   systemctl restart strongswan-starter
