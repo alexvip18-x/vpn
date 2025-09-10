@@ -42,13 +42,15 @@ conn L2TP-PSK
     keyexchange=ikev1
     type=transport
     authby=psk
-    ike=aes256-sha1-modp1024!
-    esp=aes256-sha1!
+    # Поддержка Windows/macOS/iOS
+    ike=aes256-sha1-modp1024,aes256-sha1-modp2048,aes128-sha1-modp1024,aes128-sha1-modp2048,3des-sha1-modp1024!
+    esp=aes256-sha1,aes128-sha1,3des-sha1!
     left=%defaultroute
     leftprotoport=17/1701
     right=%any
     rightprotoport=17/%any
     auto=add
+    forceencaps=yes
 EOF
 
 cat > /etc/ipsec.secrets <<EOF
@@ -120,7 +122,6 @@ echo " PSK (Pre-Shared Key): $PSK"
 echo "======================================"
 
 cat << "EOF"
-
 ██████╗░██╗░░██╗███╗░░██╗  ░██████╗░█████╗░░██████╗██╗  ██╗░░██╗██╗░░░██╗██╗
 ██╔══██╗██║░██╔╝████╗░██║  ██╔════╝██╔══██╗██╔════╝██║  ██║░░██║██║░░░██║██║
 ██████╔╝█████═╝░██╔██╗██║  ╚█████╗░██║░░██║╚█████╗░██║  ███████║██║░░░██║██║
