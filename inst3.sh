@@ -33,6 +33,12 @@ echo "[*] Включаем IP forward..."
 sysctl -w net.ipv4.ip_forward=1
 grep -q "net.ipv4.ip_forward" /etc/sysctl.conf || echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
 
+echo "[*] Загружаем L2TP модули ядра..."
+modprobe l2tp_ppp || true
+modprobe pppol2tp || true
+grep -q "l2tp_ppp" /etc/modules || echo "l2tp_ppp" >> /etc/modules
+grep -q "pppol2tp" /etc/modules || echo "pppol2tp" >> /etc/modules
+
 echo "[*] Настройка IPsec..."
 cat > /etc/ipsec.conf <<EOF
 config setup
@@ -42,7 +48,6 @@ conn L2TP-PSK
     keyexchange=ikev1
     type=transport
     authby=psk
-    # Поддержка Windows/macOS/iOS
     ike=aes256-sha1-modp1024,aes256-sha1-modp2048,aes128-sha1-modp1024,aes128-sha1-modp2048,3des-sha1-modp1024!
     esp=aes256-sha1,aes128-sha1,3des-sha1!
     left=%defaultroute
@@ -68,6 +73,9 @@ ip range = $VPN_POOL
 local ip = $VPN_LOCAL_IP
 require chap = yes
 refuse pap = yes
+refuse chap = yes
+refuse mschap = yes
+require mschap-v2 = yes
 ppp debug = yes
 pppoptfile = /etc/ppp/options.xl2tpd
 length bit = yes
@@ -75,15 +83,15 @@ EOF
 
 echo "[*] Настройка PPP..."
 cat > /etc/ppp/options.xl2tpd <<EOF
-ipcp-accept-local
-ipcp-accept-remote
+require-mschap-v2
+refuse-pap
+refuse-chap
+refuse-mschap
+mtu 1400
+mru 1400
 ms-dns $VPN_DNS1
 ms-dns $VPN_DNS2
 auth
-mtu 1410
-mru 1410
-noccp
-nodefaultroute
 lock
 proxyarp
 connect-delay 5000
